@@ -24,6 +24,8 @@ PS2_OPL_REGEX: Final = r"^([A-Z]{4}_\d{3}\.\d{2})\..*$"
 class IGDBHandler:
     def __init__(self) -> None:
         self.platform_url = "https://api.igdb.com/v4/platforms/"
+        self.platform_families_url = "https://api.igdb.com/v4/platform_families/"
+        self.platform_logos_url = "https://api.igdb.com/v4/platform_logos/"
         self.games_url = "https://api.igdb.com/v4/games/"
         self.covers_url = "https://api.igdb.com/v4/covers/"
         self.screenshots_url = "https://api.igdb.com/v4/screenshots/"
@@ -108,14 +110,58 @@ class IGDBHandler:
             if "url" in r.keys()
         ]
 
-    @check_twitch_token
-    def get_platform(self, p_slug: str):
-        paltforms = self._request(
-            self.platform_url,
-            data=f'fields id, name; where slug="{p_slug.lower()}";',
+    def _search_platform_families(self, pf_id: int) -> dict:
+        if not pf_id:
+            return {
+                "name": "",
+                "slug": "",
+            }
+
+        platform_families = self._request(
+            self.platform_families_url,
+            data=f"""
+            fields id, name, slug;
+            where id={pf_id};
+            """,
         )
 
-        platform = pydash.get(paltforms, "[0]", None)
+        family = pydash.get(platform_families, "[0]", {})
+
+        return {
+            "name": family.get("name", ""),
+            "slug": family.get("slug", ""),
+        }
+
+    def _search_platform_logo(self, pl_id: int) -> str:
+        if not pl_id:
+            return ""
+
+        platform_logos = self._request(
+            self.platform_logos_url,
+            data=f"""
+            fields id, url, height, width, alpha_channel, animated;
+            where id={pl_id};
+            """,
+        )
+
+        logo = pydash.get(platform_logos, "[0]", None)
+        return (
+            ""
+            if not logo
+            else self._normalize_cover_url(logo["url"]).replace("t_thumb", "t_original")
+        )
+
+    @check_twitch_token
+    def get_platform(self, p_slug: str):
+        platforms = self._request(
+            self.platform_url,
+            data=f"""
+            fields id, name, generation, platform_family, platform_logo;
+            where slug="{p_slug.lower()}";
+            """,
+        )
+
+        platform = pydash.get(platforms, "[0]", None)
         if not platform:
             return {
                 "igdb_id": "",
@@ -123,10 +169,19 @@ class IGDBHandler:
                 "slug": p_slug,
             }
 
+        platform_family = self._search_platform_families(
+            platform.get("platform_family", None)
+        )
+        platform_logo = self._search_platform_logo(platform.get("platform_logo", None))
+
         return {
             "igdb_id": platform["id"],
             "name": platform["name"],
             "slug": p_slug,
+            "generation": platform.get("generation", -1),
+            "pf_name": platform_family["name"],
+            "pf_slug": platform_family["slug"],
+            "logo_url": platform_logo,
         }
 
     @check_twitch_token

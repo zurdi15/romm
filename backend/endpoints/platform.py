@@ -8,14 +8,20 @@ router = APIRouter()
 
 
 class PlatformSchema(BaseModel):
+    fs_slug: str
+
     igdb_id: str
     sgdb_id: str
 
     slug: str
     name: str
+    generation: int
+
+    pf_name: str
+    pf_slug: str
 
     logo_path: str
-    fs_slug: str
+    logo_url: str
 
     n_roms: int
 

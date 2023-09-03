@@ -7,7 +7,8 @@ const platformIconUrl = ref(
 );
 
 function onImageError() {
-  platformIconUrl.value = "/assets/platforms/default.ico";
+  platformIconUrl.value =
+    props.platform.logo_url || "/assets/platforms/default.ico";
 }
 </script>
 
