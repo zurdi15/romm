@@ -68,7 +68,7 @@ onBeforeMount(async () => {
                 prepend-inner-icon="mdi-account"
                 type="text"
                 v-model="username"
-                label="Username"
+                :label="$t('username')"
                 variant="underlined"
               ></v-text-field>
               <v-text-field
@@ -76,7 +76,7 @@ onBeforeMount(async () => {
                 prepend-inner-icon="mdi-lock"
                 :type="visiblePassword ? 'text' : 'password'"
                 v-model="password"
-                label="Password"
+                :label="$t('password')"
                 variant="underlined"
                 :append-inner-icon="visiblePassword ? 'mdi-eye-off' : 'mdi-eye'"
                 @click:append-inner="visiblePassword = !visiblePassword"
@@ -90,7 +90,7 @@ onBeforeMount(async () => {
                 @click="login()"
                 append-icon="mdi-chevron-right-circle-outline"
                 block
-                >Login</v-btn
+                >{{ $t('login') }}</v-btn
               >
             </v-col>
           </v-row>

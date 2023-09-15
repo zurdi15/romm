@@ -9,6 +9,7 @@
     "lint": "eslint . --fix"
   },
   "dependencies": {
+    "@intlify/unplugin-vue-i18n": "^1.2.0",
     "@mdi/font": "7.0.96",
     "axios": "^1.3.4",
     "core-js": "^3.8.3",
@@ -21,6 +22,7 @@
     "roboto-fontface": "*",
     "socket.io-client": "^4.6.1",
     "vue": "^3.2.13",
+    "vue-i18n": "^9.4.1",
     "vue-router": "^4.0.0",
     "vuetify": "^3.3.3",
     "webfontloader": "^1.0.0"

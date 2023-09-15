@@ -3,6 +3,7 @@ import vue from "@vitejs/plugin-vue";
 import vuetify, { transformAssetUrls } from "vite-plugin-vuetify";
 import { VitePWA } from "vite-plugin-pwa";
 import pluginRewriteAll from "vite-plugin-rewrite-all";
+import VueI18nPlugin from "@intlify/unplugin-vue-i18n/vite";
 
 // Utilities
 import { defineConfig, loadEnv } from "vite";
@@ -29,6 +30,7 @@ export default defineConfig(({ mode }) => {
           configFile: "src/styles/settings.scss",
         },
       }),
+      VueI18nPlugin(),
       VitePWA({
         manifest: {
           icons: [
