@@ -55,4 +55,5 @@ frontend/dev-dist
 
 # outside data
 switch_titledb.json
+switch_nswdb.xml
 mame.xml

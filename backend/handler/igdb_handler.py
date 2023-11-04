@@ -17,6 +17,7 @@ from logger.logger import log
 from utils.cache import cache
 from tasks.update_switch_titledb import update_switch_titledb_task
 from tasks.update_mame_xml import update_mame_xml_task
+from tasks.update_switch_nswdb import update_switch_nswdb_task
 
 MAIN_GAME_CATEGORY: Final = 0
 EXPANDED_GAME_CATEGORY: Final = 10
@@ -33,6 +34,11 @@ PS2_OPL_INDEX_FILE: Final = os.path.join(
 SWITCH_TITLEDB_REGEX: Final = r"^(70[0-9]{12})$"
 SWITCH_TITLEDB_INDEX_FILE: Final = os.path.join(
     os.path.dirname(__file__), "fixtures", "switch_titledb.json"
+)
+
+SWITCH_NSWDB_REGEX: Final = r"(0100[0-9A-F]{12})"
+SWITCH_NSWDB_INDEX_FILE: Final = os.path.join(
+    os.path.dirname(__file__), "fixtures", "switch_nswdb.xml"
 )
 
 MAME_XML_FILE: Final = os.path.join(os.path.dirname(__file__), "fixtures", "mame.xml")
@@ -194,6 +200,32 @@ class IGDBHandler:
                 index_entry = titledb_index.get(title_id, None)
                 if index_entry:
                     search_term = index_entry["name"]  # type: ignore
+
+        # Patch support for switch nswDB filename format
+        match = re.search(SWITCH_NSWDB_REGEX, file_name)
+        if p_igdb_id == SWITCH_IGDB_ID and match:
+            nswdb_index = {}
+
+            try:
+                with open(SWITCH_NSWDB_INDEX_FILE, "r") as index_xml:
+                    nswdb_index = xmltodict.parse(index_xml.read())
+            except FileNotFoundError:
+                log.warning("Fetching the Switch nswDB index file...")
+                await update_switch_nswdb_task.run(force=True)
+
+                try:
+                    with open(SWITCH_NSWDB_INDEX_FILE, "r") as index_xml:
+                        nswdb_index = xmltodict.parse(index_xml.read())
+                except FileNotFoundError:
+                    log.error("Could not fetch the Switch nswDB index file")
+            finally:
+                index_entry = [
+                    game
+                    for game in nswdb_index["releases"]["release"]
+                    if match.group() in game["titleid"] 
+                ]
+                if index_entry:
+                    search_term = index_entry[0].get("name", search_term)
 
         if p_igdb_id == ARCADE_IGDB_ID:
             mame_index = { "menu": { "game": [] } }
