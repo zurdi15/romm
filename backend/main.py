@@ -140,8 +140,12 @@ def heartbeat() -> HeartbeatReturn:
 def startup() -> None:
     """Startup application."""
 
-    # Create default admin user if no admin user exists
-    if len(dbh.get_admin_users()) == 0 and "pytest" not in sys.modules:
+    # Skip if pytest is running
+    if "pytest" in sys.modules:
+        return
+
+    # Create default admin user if none exists
+    if len(dbh.get_admin_users()) == 0:
         create_default_admin_user()
 
 

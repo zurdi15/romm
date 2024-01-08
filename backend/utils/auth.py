@@ -9,6 +9,7 @@ from starlette.authentication import (
     AuthCredentials,
     AuthenticationBackend,
 )
+from ldap3 import Connection, Server
 
 from handler import dbh
 from utils.cache import cache
@@ -17,6 +18,13 @@ from config import (
     ROMM_AUTH_ENABLED,
     ROMM_AUTH_USERNAME,
     ROMM_AUTH_PASSWORD,
+    LDAP_ENABLED,
+    LDAP_USE_SSL,
+    LDAP_SERVER_URL,
+    LDAP_USER_DN,
+    LDAP_ADMIN_GROUP_DN,
+    LDAP_EDITOR_GROUP_DN,
+    LDAP_VIEWER_GROUP_DN,
 )
 
 from .oauth import (
@@ -26,6 +34,7 @@ from .oauth import (
 
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+ldap_server = Server(LDAP_SERVER_URL, use_ssl=LDAP_USE_SSL) if LDAP_ENABLED else None
 
 
 def verify_password(plain_password, hashed_password):
@@ -36,15 +45,45 @@ def get_password_hash(password):
     return pwd_context.hash(password)
 
 
+permission_mapping = {
+    LDAP_ADMIN_GROUP_DN: "ADMIN",
+    LDAP_EDITOR_GROUP_DN: "EDITOR",
+    LDAP_VIEWER_GROUP_DN: "VIEWER",
+}
+
+
+def _get_ldap_role(username: str, conn: Connection) -> str:
+    user_dn = f"cn={username},{LDAP_USER_DN}"
+
+    for group_dn, app_permission in permission_mapping.items():
+        # Check if user is in group
+        conn.search(group_dn, f"(member={user_dn})", attributes=["cn"])
+        if conn.entries:
+            return app_permission
+
+    return "VIEWER"
+
+
 def authenticate_user(username: str, password: str):
     user = dbh.get_user_by_username(username)
-    if not user:
-        return None
+    if user and verify_password(password, user.hashed_password):
+        return user
+    
+    import ipdb; ipdb.set_trace()
 
-    if not verify_password(password, user.hashed_password):
-        return None
+    if LDAP_ENABLED:
+        conn = Connection(ldap_server, user=username, password=password)
+        if conn.bind():
+            role = _get_ldap_role(username, conn)
+            user = User(
+                username=username,
+                hashed_password=get_password_hash(password),
+                role=Role[role],
+            )
+            user = dbh.add_user(user)
+            return user
 
-    return user
+    return None
 
 
 def clear_session(req: HTTPConnection | Request):

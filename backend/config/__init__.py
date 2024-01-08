@@ -97,3 +97,20 @@ ENABLE_SCHEDULED_UPDATE_MAME_XML: Final = (
 SCHEDULED_UPDATE_MAME_XML_CRON: Final = os.environ.get(
     "SCHEDULED_UPDATE_MAME_XML_CRON", "0 5 * * *"  # At 5:00 AM every day
 )
+
+# LDAP
+LDAP_ENABLED: Final = os.environ.get("LDAP_ENABLED", "false") == "true"
+LDAP_SERVER_URL: Final = os.environ.get("LDAP_SERVER_URL", "localhost")
+LDAP_USE_SSL: Final = os.environ.get("LDAP_USE_SSL", "false") == "true"
+
+LDAP_DC: Final = os.environ.get("LDAP_DC", "dc=example,dc=com")
+LDAP_USER_OU: Final = os.environ.get("LDAP_USER_OU", "users")
+LDAP_GROUP_OU: Final = os.environ.get("LDAP_GROUP_OU", "groups")
+LDAP_ADMIN_GROUP_CN: Final = os.environ.get("LDAP_ADMIN_GROUP_CN", "admin")
+LDAP_EDITOR_GROUP_CN: Final = os.environ.get("LDAP_EDITOR_GROUP_CN", "editor")
+LDAP_VIEWER_GROUP_CN: Final = os.environ.get("LDAP_VIEWER_GROUP_CN", "viewer")
+
+LDAP_USER_DN: Final = f"ou={LDAP_USER_OU},{LDAP_DC}"
+LDAP_ADMIN_GROUP_DN: Final = f"cn={LDAP_ADMIN_GROUP_CN},ou={LDAP_GROUP_OU},{LDAP_DC}"
+LDAP_EDITOR_GROUP_DN: Final = f"cn={LDAP_EDITOR_GROUP_CN},ou={LDAP_GROUP_OU},{LDAP_DC}"
+LDAP_VIEWER_GROUP_DN: Final = f"cn={LDAP_VIEWER_GROUP_CN},ou={LDAP_GROUP_OU},{LDAP_DC}"
