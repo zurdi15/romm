@@ -6,6 +6,8 @@ import mitt from "mitt";
 import { createApp } from "vue";
 import { createVuetify } from "vuetify";
 import App from "./App.vue";
+import 'primevue/resources/themes/aura-dark-purple/theme.css'
+import 'primevue/resources/primevue.min.css';
 
 const emitter = mitt<Events>();
 

@@ -40,6 +40,7 @@
     "mitt": "^3.0.1",
     "nanoid": "^5.0.4",
     "pinia": "^2.1.6",
+    "primevue": "^3.50.0",
     "roboto-fontface": "*",
     "socket.io-client": "^4.7.5",
     "vue": "^3.2.13",

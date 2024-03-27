@@ -4,7 +4,7 @@ import storeAuth from "@/stores/auth";
 import storeHeartbeat from "@/stores/heartbeat";
 import type { Events } from "@/types/emitter";
 import type { Emitter } from "mitt";
-import { inject, onBeforeMount, ref } from "vue";
+import { inject, onBeforeMount, ref, h } from "vue";
 import { useRouter } from "vue-router";
 
 // Props
@@ -55,74 +55,65 @@ onBeforeMount(async () => {
 </script>
 
 <template>
-  <span id="bg"></span>
+  <div id="bg" class="bg"></div>
 
-  <v-container class="fill-height justify-center">
-    <v-card id="card" class="py-8 px-5" width="500">
-      <v-row>
-        <v-col>
-          <v-img
-            src="/assets/isotipo.svg"
-            class="mx-auto"
-            width="200"
-            height="200"
-          />
+  <div class="p-container fill-height justify-center">
+    <Card id="card" class="py-8 px-5" style="width: 500px">
+      <template #content>
+        <div class="p-row">
+          <div class="p-col">
+            <img
+              src="/assets/isotipo.svg"
+              class="mx-auto"
+              alt="logo"
+              style="width: 200px; height: 200px"
+            />
 
-          <v-row class="text-white justify-center mt-2">
-            <v-col cols="10" md="8">
-              <v-text-field
-                @keyup.enter="login()"
-                prepend-inner-icon="mdi-account"
-                type="text"
-                v-model="username"
-                label="Username"
-                variant="underlined"
-              ></v-text-field>
-              <v-text-field
-                @keyup.enter="login()"
-                prepend-inner-icon="mdi-lock"
-                :type="visiblePassword ? 'text' : 'password'"
-                v-model="password"
-                label="Password"
-                variant="underlined"
-                :append-inner-icon="visiblePassword ? 'mdi-eye-off' : 'mdi-eye'"
-                @click:append-inner="visiblePassword = !visiblePassword"
-              ></v-text-field>
-            </v-col>
-          </v-row>
+            <div class="text-white justify-center mt-2">
+              <div class="p-col-10 p-md-8">
+                <InputText
+                  v-model="username"
+                  @keydown.enter.native="login()"
+                  prepend="mdi-account"
+                  placeholder="Username"
+                />
+                <Password
+                  v-model="password"
+                  @keydown.enter.native="login()"
+                  placeholder="Password"
+                  :toggleMask="visiblePassword"
+                  @click.native="visiblePassword = !visiblePassword"
+                />
+              </div>
+            </div>
 
-          <v-row class="justify-center">
-            <v-col cols="10" md="8">
-              <v-btn
-                @click="login()"
-                :disabled="logging"
-                color="romm-accent-1"
-                append-icon="mdi-chevron-right-circle-outline"
-                block
-                :loading="logging"
-                >Login
-                <template v-slot:loader>
-                  <v-progress-circular
-                    color="romm-accent-1"
-                    :width="2"
-                    :size="20"
-                    indeterminate
-                  />
-                </template>
-              </v-btn>
-            </v-col>
-          </v-row>
-        </v-col>
-      </v-row>
-    </v-card>
+            <div class="justify-center">
+              <div class="p-col-10 p-md-8">
+                <Button
+                  @click="login()"
+                  :disabled="logging"
+                  class="romm-accent-1"
+                  icon="mdi-chevron-right-circle-outline"
+                  :loading="logging"
+                  loading-text="Logging in..."
+                  :loader="h('ProgressSpinner', { color: 'romm-accent-1' })"
+                >
+                  Login
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </template>
+    </Card>
 
     <div class="position-absolute" id="version">
-      <span class="text-white">{{ heartbeatStore.value.VERSION }}</span>
+      <span class="text-white">{{ heartbeatStore.VERSION }}</span>
     </div>
-  </v-container>
+  </div>
 </template>
 
-<style>
+<style scoped>
 #bg {
   top: 0;
   left: 0;
